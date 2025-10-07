@@ -137,12 +137,12 @@ async def get_band(
         )
     return band
 
-@app.get("/users/{user_id}/bands", response_model=List[BandResponse])
-async def get_user_bands(
+@app.get("/profiles/{user_id}/bands", response_model=List[BandResponse])
+async def get_profile_bands(
     user_id: UUID,
     repo: BandRepository = Depends(get_repository)
 ):
-    """Get all bands for a user"""
+    """Get all bands for a profile/user"""
     bands = await repo.get_user_bands(user_id)
     return bands
 
