@@ -1,0 +1,48 @@
+[tool.pytest.ini_options]
+# Pytest configuration for Band Manager API tests
+
+# Test discovery
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+# Output and logging
+addopts = [
+    "-v",                    # Verbose output
+    "--tb=short",           # Short traceback format
+    "--strict-markers",      # Treat unknown markers as errors
+    "--disable-warnings",    # Disable warnings for cleaner output
+    "--asyncio-mode=auto",   # Auto-detect async tests
+]
+
+# Minimum version requirements
+minversion = "7.0"
+
+# Async test configuration
+asyncio_mode = "auto"
+
+# Markers for categorizing tests
+markers = [
+    "unit: Unit tests that test individual functions/methods",
+    "integration: Integration tests that test multiple components",
+    "api: API endpoint tests",
+    "slow: Tests that take a long time to run",
+    "database: Tests that require database access",
+    "auth: Tests related to authentication/authorization",
+]
+
+# Test filtering
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+    "ignore:.*factory_boy.*:DeprecationWarning",
+]
+
+# Coverage configuration (if using pytest-cov)
+# addopts = [
+#     "--cov=.",
+#     "--cov-report=html",
+#     "--cov-report=term-missing",
+#     "--cov-fail-under=80"
+# ]
