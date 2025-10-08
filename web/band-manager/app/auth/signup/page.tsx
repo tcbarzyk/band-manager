@@ -272,17 +272,6 @@ export default function SignupPage() {
               {isLoading ? "Creating account..." : "Create account"}
             </button>
           </div>
-
-          <div className="text-xs text-center text-gray-500 dark:text-gray-400">
-            By creating an account, you agree to our{" "}
-            <a href="#" className="text-indigo-600 hover:text-indigo-500">
-              Terms of Service
-            </a>{" "}
-            and{" "}
-            <a href="#" className="text-indigo-600 hover:text-indigo-500">
-              Privacy Policy
-            </a>
-          </div>
         </form>
       </div>
     </div>

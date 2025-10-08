@@ -45,34 +45,7 @@ export function HomeContent() {
             Create Account
           </Link>
         </div>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <div className="text-center text-sm text-gray-500 dark:text-gray-400">
-            <p>🚀 Ready for full authentication integration!</p>
-            <p className="mt-2">
-              Start by{" "}
-              <Link
-                href="/auth/signup"
-                className="text-indigo-600 hover:text-indigo-500 font-medium"
-              >
-                creating an account
-              </Link>{" "}
-              or{" "}
-              <Link
-                href="/auth/login"
-                className="text-indigo-600 hover:text-indigo-500 font-medium"
-              >
-                signing in
-              </Link>
-            </p>
-          </div>
-        </div>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-          <span>🎵 Band Manager</span>
-        </div>
-      </footer>
     </div>
   );
 }
