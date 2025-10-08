@@ -9,6 +9,23 @@ from datetime import datetime
 from uuid import UUID
 from models import BandRole, EventType, EventStatus
 
+# Authentication schemas
+class UserInfo(BaseModel):
+    """User information extracted from Supabase JWT token"""
+    user_id: str
+    email: str
+    role: str = "authenticated"
+    aud: str
+    exp: int
+    iat: int
+
+class AuthResponse(BaseModel):
+    """Response for successful authentication"""
+    access_token: str
+    token_type: str = "bearer"
+    user: UserInfo
+    expires_in: int
+
 # Profile schemas
 class ProfileBase(BaseModel):
     display_name: str
@@ -22,9 +39,21 @@ class ProfileCreate(ProfileBase):
             raise ValueError('Display name must be between 1 and 100 characters')
         return v
 
+class ProfileUpdate(BaseModel):
+    """Schema for updating profile information"""
+    display_name: Optional[str] = None
+    
+    @field_validator('display_name')
+    @classmethod
+    def validate_display_name(cls, v):
+        if v is not None and (len(v) < 1 or len(v) > 100):
+            raise ValueError('Display name must be between 1 and 100 characters')
+        return v
+
 class ProfileResponse(ProfileBase):
     user_id: UUID
     created_at: datetime
+    updated_at: Optional[datetime] = None
     
     class Config:
         from_attributes = True

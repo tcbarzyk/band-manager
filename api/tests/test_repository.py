@@ -8,12 +8,13 @@ in isolation, using an in-memory SQLite database.
 import pytest
 from uuid import uuid4
 from datetime import datetime, timezone
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from repository import BandRepository
 from schemas import ProfileCreate, BandCreate, VenueCreate, EventCreate, EventUpdate
 from models import BandRole, EventType, EventStatus
 from tests.factories import (
-    ProfileFactory, BandFactory, VenueFactory, EventFactory,
+    ProfileFactory, BandFactory, VenueFactory, EventFactory, MembershipFactory,
     TEST_USER_ID_1, TEST_USER_ID_2
 )
 
@@ -70,6 +71,62 @@ class TestProfileRepository:
         profile = await test_repo.get_profile(nonexistent_id)
         
         assert profile is None
+    
+    @pytest.mark.asyncio
+    async def test_update_profile(self, test_repo: BandRepository):
+        """Test updating a profile"""
+        # Create a profile first
+        profile_data = ProfileFactory()
+        user_id = TEST_USER_ID_1
+        created_profile = await test_repo.create_profile(profile_data, user_id)
+        
+        # Update the profile
+        update_data = {"display_name": "Updated Name"}
+        updated_profile = await test_repo.update_profile(user_id, update_data)
+        
+        assert updated_profile is not None
+        assert updated_profile.display_name == "Updated Name"
+        assert updated_profile.email == profile_data.email  # Should remain unchanged
+    
+    @pytest.mark.asyncio
+    async def test_ensure_profile_exists_new_user(self, test_repo: BandRepository):
+        """Test ensure_profile_exists creates new profile for new user"""
+        user_id = TEST_USER_ID_1
+        email = "test@example.com"
+        display_name = "Test User"
+        
+        profile = await test_repo.ensure_profile_exists(user_id, email, display_name)
+        
+        assert profile.user_id == user_id
+        assert profile.email == email
+        assert profile.display_name == display_name
+    
+    @pytest.mark.asyncio
+    async def test_ensure_profile_exists_existing_user(self, test_repo: BandRepository):
+        """Test ensure_profile_exists returns existing profile"""
+        # Create a profile first
+        profile_data = ProfileFactory()
+        user_id = TEST_USER_ID_1
+        created_profile = await test_repo.create_profile(profile_data, user_id)
+        
+        # Call ensure_profile_exists - should return existing profile
+        profile = await test_repo.ensure_profile_exists(user_id, profile_data.email, "Different Name")
+        
+        assert profile.user_id == created_profile.user_id
+        assert profile.email == created_profile.email
+        assert profile.display_name == created_profile.display_name  # Should not change
+    
+    @pytest.mark.asyncio
+    async def test_ensure_profile_exists_auto_display_name(self, test_repo: BandRepository):
+        """Test ensure_profile_exists auto-generates display name from email"""
+        user_id = TEST_USER_ID_1
+        email = "testuser@example.com"
+        
+        profile = await test_repo.ensure_profile_exists(user_id, email)
+        
+        assert profile.user_id == user_id
+        assert profile.email == email
+        assert profile.display_name == "testuser"  # Should be email prefix
 
 class TestBandRepository:
     """Test band-related repository operations"""
@@ -187,6 +244,61 @@ class TestBandRepository:
         # Check total band members
         members = await test_repo.get_band_members(band.id)
         assert len(members) == 2
+
+    @pytest.mark.asyncio
+    async def test_is_band_member(self, test_session: AsyncSession):
+        """Test checking if user is a band member"""
+        test_repo = BandRepository(test_session)
+        
+        # Create test band and user using repository methods
+        user_id = "12345678-1234-5678-1234-567812345678"  # Valid UUID
+        profile_data = ProfileFactory(user_id=user_id)
+        await test_repo.create_profile(profile_data, user_id)
+        
+        band_data = BandFactory()
+        band = await test_repo.create_band(band_data, user_id)
+        
+        # User should already be a member (band creator becomes leader)
+        is_member = await test_repo.is_band_member(band.id, user_id)
+        assert is_member is True
+        
+        # Test with non-existent user
+        is_member = await test_repo.is_band_member(band.id, "87654321-4321-8765-4321-876543218765")
+        assert is_member is False
+
+    @pytest.mark.asyncio
+    async def test_get_user_band_role(self, test_session: AsyncSession):
+        """Test getting user's role in a band"""
+        test_repo = BandRepository(test_session)
+        
+        # Create test band and users using repository methods
+        admin_user_id = "12345678-1234-5678-1234-567812345678"  # Valid UUID
+        member_user_id = "87654321-4321-8765-4321-876543218765"  # Valid UUID
+        
+        # Create admin user and band (admin becomes leader)
+        admin_profile_data = ProfileFactory(user_id=admin_user_id)
+        await test_repo.create_profile(admin_profile_data, admin_user_id)
+        
+        band_data = BandFactory()
+        band = await test_repo.create_band(band_data, admin_user_id)
+        
+        # Create member user and add them to the band
+        member_profile_data = ProfileFactory(user_id=member_user_id)
+        await test_repo.create_profile(member_profile_data, member_user_id)
+        await test_repo.join_band(band.join_code, member_user_id)
+        
+        # Check admin role (should be LEADER, not ADMIN)
+        role = await test_repo.get_user_band_role(band.id, admin_user_id)
+        assert role == BandRole.LEADER
+        
+        # Check member role
+        role = await test_repo.get_user_band_role(band.id, member_user_id)
+        assert role == BandRole.MEMBER
+        
+        # Check non-member user (should return None)
+        non_member_id = "11111111-1111-1111-1111-111111111111"  # Valid UUID
+        role = await test_repo.get_user_band_role(band.id, non_member_id)
+        assert role is None
 
 class TestVenueRepository:
     """Test venue-related repository operations"""

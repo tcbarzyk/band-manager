@@ -11,7 +11,7 @@ import uuid
 
 # Since we're using Pydantic schemas, we'll create factory classes for them
 from schemas import ProfileCreate, BandCreate, VenueCreate, EventCreate
-from models import EventType, BandRole, EventStatus
+from models import EventType, BandRole, EventStatus, Membership
 
 class ProfileFactory(factory.Factory):
     """Factory for creating Profile test data"""
@@ -66,6 +66,14 @@ class GigFactory(EventFactory):
     """Factory specifically for gig events"""
     type = EventType.GIG
     title = factory.Sequence(lambda n: f"Live Performance {n}")
+
+class MembershipFactory(factory.Factory):
+    """Factory for creating Membership test data"""
+    
+    class Meta:
+        model = Membership
+    
+    role = BandRole.MEMBER
 
 # Utility functions for creating test UUIDs
 def generate_test_uuid(seed: str = None) -> uuid.UUID:

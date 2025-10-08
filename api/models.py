@@ -64,13 +64,15 @@ class EventStatus(str, enum.Enum):
     CANCELLED = "cancelled"
 
 class Profile(Base):
-    """User profiles table"""
+    """User profiles table - synced with Supabase Auth users"""
     __tablename__ = "profiles"
     
-    user_id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    # This should match the Supabase Auth user UUID
+    user_id = Column(GUID(), primary_key=True)  # Removed default since this comes from Supabase
     display_name = Column(String(100), nullable=False)
     email = Column(String(255), nullable=False, unique=True)
     created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now())
     
     # Relationships
     created_bands = relationship("Band", back_populates="creator")

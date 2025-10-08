@@ -24,7 +24,7 @@ class BandRepository:
 
     # Profile operations
     async def create_profile(self, profile_data: ProfileCreate, user_id: UUID) -> Profile:
-        """Create a new user profile"""
+        """Create a new user profile linked to Supabase auth user"""
         db_profile = Profile(
             user_id=user_id,
             display_name=profile_data.display_name,
@@ -48,6 +48,37 @@ class BandRepository:
             select(Profile).where(Profile.email == email)
         )
         return result.scalar_one_or_none()
+
+    async def update_profile(self, user_id: UUID, update_data: dict) -> Optional[Profile]:
+        """Update user profile"""
+        profile = await self.get_profile(user_id)
+        if not profile:
+            return None
+            
+        for field, value in update_data.items():
+            if hasattr(profile, field) and value is not None:
+                setattr(profile, field, value)
+        
+        await self.db.commit()
+        await self.db.refresh(profile)
+        return profile
+
+    async def ensure_profile_exists(self, user_id: UUID, email: str, display_name: str = None) -> Profile:
+        """Ensure a profile exists for a Supabase user, create if not exists"""
+        profile = await self.get_profile(user_id)
+        
+        if not profile:
+            # Create profile using the display name or email prefix
+            if not display_name:
+                display_name = email.split('@')[0]
+            
+            profile_data = ProfileCreate(
+                display_name=display_name,
+                email=email
+            )
+            profile = await self.create_profile(profile_data, user_id)
+        
+        return profile
 
     async def update_profile(self, user_id: UUID, profile_data: dict) -> Optional[Profile]:
         """Update user profile"""
@@ -114,6 +145,25 @@ class BandRepository:
             .order_by(Band.created_at.desc())
         )
         return result.scalars().all()
+
+    async def is_band_member(self, band_id: UUID, user_id: UUID) -> bool:
+        """Check if user is a member of the band"""
+        result = await self.db.execute(
+            select(Membership).where(
+                and_(Membership.band_id == band_id, Membership.user_id == user_id)
+            )
+        )
+        return result.scalar_one_or_none() is not None
+
+    async def get_user_band_role(self, band_id: UUID, user_id: UUID) -> Optional[BandRole]:
+        """Get user's role in a specific band"""
+        result = await self.db.execute(
+            select(Membership.role).where(
+                and_(Membership.band_id == band_id, Membership.user_id == user_id)
+            )
+        )
+        role = result.scalar_one_or_none()
+        return role
 
     async def update_band(self, band_id: UUID, band_data: dict) -> Optional[Band]:
         """Update band information"""

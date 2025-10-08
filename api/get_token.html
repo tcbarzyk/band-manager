@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Get Supabase Token</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <h1>Band Manager - Get Auth Token</h1>
+    
+    <div id="login-form">
+        <h2>Login</h2>
+        <input type="email" id="email" placeholder="Email" value="user1@test.com">
+        <input type="password" id="password" placeholder="Password" value="password123">
+        <button onclick="login()">Login</button>
+    </div>
+    
+    <div id="token-display" style="display: none;">
+        <h2>JWT Token:</h2>
+        <textarea id="token" rows="10" cols="80" readonly></textarea>
+        <br><br>
+        <button onclick="copyToken()">Copy Token</button>
+        <button onclick="logout()">Logout</button>
+    </div>
+
+    <script>
+        // Replace with your actual Supabase URL and anon key
+        const SUPABASE_URL = 'https://bboekrplnzzavddxumym.supabase.co'
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJib2VrcnBsbnp6YXZkZHh1bXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk3Nzg5MzksImV4cCI6MjA3NTM1NDkzOX0.BtB_HspM-DXzx3SYj4gNoV8_2yjgqNrKgDlqIbYeTRI'
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+        async function login() {
+            const email = document.getElementById('email').value
+            const password = document.getElementById('password').value
+            
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email: email,
+                password: password
+            })
+            
+            if (error) {
+                alert('Login failed: ' + error.message)
+                return
+            }
+            
+            const token = data.session.access_token
+            document.getElementById('token').value = token
+            document.getElementById('login-form').style.display = 'none'
+            document.getElementById('token-display').style.display = 'block'
+            
+            console.log('User:', data.user)
+            console.log('Session:', data.session)
+        }
+        
+        function copyToken() {
+            const tokenEl = document.getElementById('token')
+            tokenEl.select()
+            document.execCommand('copy')
+            alert('Token copied to clipboard!')
+        }
+        
+        async function logout() {
+            await supabase.auth.signOut()
+            document.getElementById('login-form').style.display = 'block'
+            document.getElementById('token-display').style.display = 'none'
+            document.getElementById('token').value = ''
+        }
+    </script>
+</body>
+</html>

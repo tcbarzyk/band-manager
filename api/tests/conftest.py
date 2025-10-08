@@ -5,6 +5,7 @@ This module provides:
 - Test database setup and teardown
 - Common fixtures for test data
 - Test client configuration
+- Authentication testing utilities
 """
 
 import pytest
@@ -13,7 +14,9 @@ from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.pool import StaticPool
 import uuid
-from typing import AsyncGenerator
+from typing import AsyncGenerator, Dict, Any
+from unittest.mock import patch
+import jwt
 
 # Import your application modules
 import sys
@@ -24,6 +27,7 @@ from main import app
 from database import get_db
 from models import Base
 from repository import BandRepository
+from auth import get_current_user, get_current_user_optional
 
 # Test database configuration
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
@@ -121,6 +125,102 @@ async def async_client(test_session) -> AsyncGenerator[AsyncClient, None]:
 def sample_user_id():
     """Generate a consistent user ID for tests"""
     return uuid.UUID("12345678-1234-5678-1234-567812345678")
+
+@pytest.fixture
+def sample_user_id_2():
+    """Generate a second consistent user ID for tests"""
+    return uuid.UUID("87654321-4321-8765-4321-876543218765")
+
+@pytest.fixture
+def mock_user_1():
+    """Mock authenticated user data for testing"""
+    return {
+        "user_id": "12345678-1234-5678-1234-567812345678",
+        "email": "test@example.com",
+        "role": "authenticated",
+        "aud": "authenticated",
+        "exp": 9999999999,  # Far future
+        "iat": 1000000000
+    }
+
+@pytest.fixture
+def mock_user_2():
+    """Mock second authenticated user data for testing"""
+    return {
+        "user_id": "87654321-4321-8765-4321-876543218765",
+        "email": "test2@example.com",
+        "role": "authenticated",
+        "aud": "authenticated",
+        "exp": 9999999999,  # Far future
+        "iat": 1000000000
+    }
+
+@pytest.fixture
+def auth_headers_user_1():
+    """Generate valid auth headers for mock user 1"""
+    return {"Authorization": "Bearer valid-jwt-token-user-1"}
+
+@pytest.fixture
+def auth_headers_user_2():
+    """Generate valid auth headers for mock user 2"""
+    return {"Authorization": "Bearer valid-jwt-token-user-2"}
+
+@pytest.fixture
+def mock_auth_user_1(mock_user_1):
+    """Mock authentication dependency to return user 1"""
+    async def mock_get_current_user():
+        return mock_user_1
+    return mock_get_current_user
+
+@pytest.fixture
+def mock_auth_user_2(mock_user_2):
+    """Mock authentication dependency to return user 2"""
+    async def mock_get_current_user():
+        return mock_user_2
+    return mock_get_current_user
+
+@pytest.fixture
+def authenticated_client_user_1(test_session, mock_auth_user_1):
+    """Test client authenticated as user 1"""
+    async def override_get_db():
+        yield test_session
+    
+    app.dependency_overrides[get_db] = override_get_db
+    app.dependency_overrides[get_current_user] = mock_auth_user_1
+    app.dependency_overrides[get_current_user_optional] = mock_auth_user_1
+    
+    with TestClient(app) as client:
+        yield client
+    
+    app.dependency_overrides.clear()
+
+@pytest.fixture
+def authenticated_client_user_2(test_session, mock_auth_user_2):
+    """Test client authenticated as user 2"""
+    async def override_get_db():
+        yield test_session
+    
+    app.dependency_overrides[get_db] = override_get_db
+    app.dependency_overrides[get_current_user] = mock_auth_user_2
+    app.dependency_overrides[get_current_user_optional] = mock_auth_user_2
+    
+    with TestClient(app) as client:
+        yield client
+    
+    app.dependency_overrides.clear()
+
+@pytest.fixture
+def unauthenticated_client(test_session):
+    """Test client without authentication"""
+    async def override_get_db():
+        yield test_session
+    
+    app.dependency_overrides[get_db] = override_get_db
+    
+    with TestClient(app) as client:
+        yield client
+    
+    app.dependency_overrides.clear()
 
 @pytest.fixture
 def sample_profile_data():
