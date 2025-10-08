@@ -119,6 +119,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Bands Section */}
+                    {/* Bands Section */}
           <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
             <div className="px-4 py-5 sm:p-6">
               <div className="flex justify-between items-center mb-4">
@@ -128,13 +129,13 @@ export default function DashboardPage() {
                 <div className="flex space-x-2">
                   <Link
                     href="/bands/create"
-                    className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700 transition-colors"
+                    className="bg-indigo-600 text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-indigo-700 transition-colors"
                   >
                     Create Band
                   </Link>
                   <Link
                     href="/bands/join"
-                    className="bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-green-700 transition-colors"
+                    className="bg-green-600 text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-green-700 transition-colors"
                   >
                     Join Band
                   </Link>
@@ -172,9 +173,10 @@ export default function DashboardPage() {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {bands.map((band) => (
-                    <div
+                    <Link
                       key={band.id}
-                      className="border border-gray-200 dark:border-gray-600 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
+                      href={`/bands/${band.id}`}
+                      className="border border-gray-200 dark:border-gray-600 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer block"
                     >
                       <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
                         {band.name}
@@ -187,7 +189,7 @@ export default function DashboardPage() {
                       <div className="text-xs text-gray-500 dark:text-gray-500">
                         Join Code: {band.join_code}
                       </div>
-                    </div>
+                    </Link>
                   ))}
                 </div>
               )}
