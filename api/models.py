@@ -85,6 +85,7 @@ class Band(Base):
     
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     name = Column(String(64), nullable=False)
+    description = Column(Text, nullable=True)
     timezone = Column(String(50), nullable=False, default="America/New_York")
     join_code = Column(String(20), nullable=False, unique=True)
     created_by = Column(GUID(), ForeignKey("profiles.user_id"), nullable=False)

@@ -76,7 +76,8 @@ async def get_current_user_profile(
     # Ensure profile exists for this user
     profile = await repo.ensure_profile_exists(
         user_id=user_id,
-        email=current_user["email"]
+        email=current_user["email"],
+        display_name=current_user.get("display_name")
     )
     
     return profile
@@ -175,7 +176,8 @@ async def create_band(
         # Ensure user has a profile
         await repo.ensure_profile_exists(
             user_id=user_id,
-            email=current_user["email"]
+            email=current_user["email"],
+            display_name=current_user.get("display_name")
         )
         
         band = await repo.create_band(band_data, user_id)
@@ -244,7 +246,8 @@ async def join_band(
     # Ensure user has a profile
     await repo.ensure_profile_exists(
         user_id=user_id,
-        email=current_user["email"]
+        email=current_user["email"],
+        display_name=current_user.get("display_name")
     )
     
     membership = await repo.join_band(join_code, user_id)

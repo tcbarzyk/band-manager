@@ -90,13 +90,15 @@ class SupabaseAuth:
         payload = self.verify_jwt_token(token)
         
         # Extract user info from token payload
+        user_metadata = payload.get("user_metadata", {})
         user_info = {
             "user_id": payload.get("sub"),
             "email": payload.get("email"),
             "role": payload.get("role", "authenticated"),
             "aud": payload.get("aud"),
             "exp": payload.get("exp"),
-            "iat": payload.get("iat")
+            "iat": payload.get("iat"),
+            "display_name": user_metadata.get("display_name")
         }
         
         if not user_info["user_id"]:

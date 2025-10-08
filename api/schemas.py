@@ -61,6 +61,7 @@ class ProfileResponse(ProfileBase):
 # Band schemas
 class BandBase(BaseModel):
     name: str
+    description: Optional[str] = None
     timezone: str = "America/New_York"
 
 class BandCreate(BandBase):
