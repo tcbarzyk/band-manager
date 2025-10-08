@@ -130,15 +130,6 @@ export default function BandPage() {
           <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg mb-6">
             <div className="px-4 py-5 sm:p-6">
               <div className="flex flex-col lg:flex-row lg:items-start lg:space-x-6">
-                {/* Band Image Placeholder */}
-                <div className="flex-shrink-0 mb-4 lg:mb-0">
-                  <div className="w-48 h-48 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
-                    <div className="text-white text-center">
-                      <div className="text-4xl mb-2">🎵</div>
-                      <div className="text-sm font-medium">Band Photo</div>
-                    </div>
-                  </div>
-                </div>
 
                 {/* Band Details */}
                 <div className="flex-1">
@@ -201,15 +192,17 @@ export default function BandPage() {
                       <div className="flex items-center space-x-3">
                         <div className="w-10 h-10 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center">
                           <span className="text-gray-600 dark:text-gray-300 text-sm font-medium">
-                            {member.user_id.slice(0, 2).toUpperCase()}
+                            {member.user_display_name 
+                              ? member.user_display_name.slice(0, 2).toUpperCase()
+                              : member.user_id.slice(0, 2).toUpperCase()}
                           </span>
                         </div>
                         <div>
                           <p className="text-sm font-medium text-gray-900 dark:text-white">
-                            User ID: {member.user_id.slice(0, 8)}...
+                            {member.user_display_name || `User ${member.user_id.slice(0, 8)}...`}
                           </p>
                           <p className="text-xs text-gray-500 dark:text-gray-400">
-                            {member.role} • Joined {new Date(member.joined_at).toLocaleDateString()}
+                            {member.role} • Joined {new Date(member.created_at).toLocaleDateString()}
                           </p>
                         </div>
                       </div>
@@ -223,15 +216,33 @@ export default function BandPage() {
           {/* Navigation Sections */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Events Section */}
-            <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
+            <Link
+              href={`/bands/${band.id}/events`}
+              className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow cursor-pointer block"
+            >
               <div className="px-4 py-5 sm:p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-medium text-gray-900 dark:text-white">
                     Events
                   </h3>
-                  <span className="text-xs text-gray-500 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
-                    Coming Soon
-                  </span>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-xs text-indigo-600 bg-indigo-100 dark:bg-indigo-900 dark:text-indigo-300 px-2 py-1 rounded">
+                      Manage
+                    </span>
+                    <svg
+                      className="w-5 h-5 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 5l7 7-7 7"
+                      />
+                    </svg>
+                  </div>
                 </div>
                 <div className="text-center py-8">
                   <div className="text-4xl mb-2">📅</div>
@@ -240,18 +251,36 @@ export default function BandPage() {
                   </p>
                 </div>
               </div>
-            </div>
+            </Link>
 
             {/* Venues Section */}
-            <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
+            <Link
+              href={`/bands/${band.id}/venues`}
+              className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow cursor-pointer block"
+            >
               <div className="px-4 py-5 sm:p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-medium text-gray-900 dark:text-white">
                     Venues
                   </h3>
-                  <span className="text-xs text-gray-500 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
-                    Coming Soon
-                  </span>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-xs text-indigo-600 bg-indigo-100 dark:bg-indigo-900 dark:text-indigo-300 px-2 py-1 rounded">
+                      Manage
+                    </span>
+                    <svg
+                      className="w-5 h-5 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 5l7 7-7 7"
+                      />
+                    </svg>
+                  </div>
                 </div>
                 <div className="text-center py-8">
                   <div className="text-4xl mb-2">🏛️</div>
@@ -260,7 +289,7 @@ export default function BandPage() {
                   </p>
                 </div>
               </div>
-            </div>
+            </Link>
 
             {/* Setlists Section */}
             <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">

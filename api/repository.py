@@ -341,7 +341,7 @@ class BandRepository:
         if not event:
             return None
         
-        update_data = event_data.dict(exclude_unset=True)
+        update_data = event_data.model_dump(exclude_unset=True)
         for key, value in update_data.items():
             if hasattr(event, key):
                 setattr(event, key, value)

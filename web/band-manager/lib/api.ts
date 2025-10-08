@@ -105,6 +105,64 @@ class ApiClient {
   async getBandMembers(bandId: string) {
     return this.request(`/bands/${bandId}/members`);
   }
+
+  // Venue endpoints
+  async getBandVenues(bandId: string) {
+    return this.request(`/bands/${bandId}/venues`);
+  }
+
+  async createVenue(bandId: string, data: CreateVenueData) {
+    return this.request(`/bands/${bandId}/venues`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async getVenue(venueId: string) {
+    return this.request(`/venues/${venueId}`);
+  }
+
+  async updateVenue(venueId: string, data: CreateVenueData) {
+    return this.request(`/venues/${venueId}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteVenue(venueId: string) {
+    return this.request(`/venues/${venueId}`, {
+      method: "DELETE",
+    });
+  }
+
+  // Event endpoints
+  async getBandEvents(bandId: string) {
+    return this.request(`/bands/${bandId}/events`);
+  }
+
+  async createEvent(bandId: string, data: CreateEventData) {
+    return this.request(`/bands/${bandId}/events`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async getEvent(eventId: string) {
+    return this.request(`/events/${eventId}`);
+  }
+
+  async updateEvent(eventId: string, data: UpdateEventData) {
+    return this.request(`/events/${eventId}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteEvent(eventId: string) {
+    return this.request(`/events/${eventId}`, {
+      method: "DELETE",
+    });
+  }
 }
 
 // Export a singleton instance
@@ -140,10 +198,59 @@ export type CreateBandData = {
   timezone: string;
 };
 
+export type Venue = {
+  id: string;
+  band_id: string;
+  name: string;
+  address: string | null;
+  notes: string | null;
+};
+
+export type CreateVenueData = {
+  name: string;
+  address?: string;
+  notes?: string;
+};
+
+export type Event = {
+  id: string;
+  band_id: string;
+  type: "rehearsal" | "gig";
+  status: "planned" | "confirmed" | "cancelled";
+  title: string;
+  starts_at_utc: string;
+  ends_at_utc: string;
+  venue_id: string | null;
+  notes: string | null;
+  created_by: string;
+  created_at: string;
+};
+
+export type CreateEventData = {
+  title: string;
+  type: "rehearsal" | "gig";
+  starts_at_utc: string;
+  ends_at_utc: string;
+  venue_id?: string;
+  notes?: string;
+};
+
+export type UpdateEventData = {
+  title?: string;
+  type?: "rehearsal" | "gig";
+  status?: "planned" | "confirmed" | "cancelled";
+  starts_at_utc?: string;
+  ends_at_utc?: string;
+  venue_id?: string;
+  notes?: string;
+};
+
 export type Membership = {
   id: string;
   band_id: string;
   user_id: string;
   role: string;
-  joined_at: string;
+  created_at: string;
+  user_display_name?: string;
+  user_email?: string;
 };

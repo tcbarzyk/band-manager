@@ -94,6 +94,8 @@ class MembershipResponse(MembershipBase):
     band_id: UUID
     user_id: UUID
     created_at: datetime
+    user_display_name: Optional[str] = None
+    user_email: Optional[str] = None
     
     class Config:
         from_attributes = True

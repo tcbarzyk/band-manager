@@ -276,7 +276,22 @@ async def get_band_members(
         )
     
     members = await repo.get_band_members(band_id)
-    return members
+    
+    # Transform members to include user information
+    response = []
+    for member in members:
+        member_data = {
+            "id": member.id,
+            "band_id": member.band_id,
+            "user_id": member.user_id,
+            "role": member.role,
+            "created_at": member.created_at,
+            "user_display_name": member.user.display_name if member.user else None,
+            "user_email": member.user.email if member.user else None,
+        }
+        response.append(MembershipResponse(**member_data))
+    
+    return response
 
 # Venue endpoints
 @app.post("/bands/{band_id}/venues", response_model=VenueResponse, status_code=status.HTTP_201_CREATED)
@@ -351,6 +366,45 @@ async def get_venue(
         )
     
     return venue
+
+@app.put("/venues/{venue_id}", response_model=VenueResponse)
+async def update_venue(
+    venue_id: UUID,
+    venue_data: VenueCreate,
+    current_user: Dict[str, Any] = Depends(get_current_user),
+    repo: BandRepository = Depends(get_repository)
+):
+    """Update a venue (must be a member of the band)"""
+    user_id = UUID(current_user["user_id"])
+    
+    venue = await repo.get_venue(venue_id)
+    if not venue:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Venue not found"
+        )
+    
+    # Check if user is a member of the band that owns this venue
+    is_member = await repo.is_band_member(venue.band_id, user_id)
+    if not is_member:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied: You are not a member of the band that owns this venue"
+        )
+    
+    try:
+        updated_venue = await repo.update_venue(venue_id, venue_data.model_dump(exclude_unset=True))
+        if not updated_venue:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Venue not found"
+            )
+        return updated_venue
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Failed to update venue: {str(e)}"
+        )
 
 @app.delete("/venues/{venue_id}")
 async def delete_venue(
