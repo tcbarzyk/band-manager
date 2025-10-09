@@ -130,16 +130,26 @@ export async function getCurrentUser() {
 
 export async function getCurrentSession() {
   try {
+    console.log("🔍 Getting current session from Supabase...");
     const {
       data: { session },
       error,
     } = await supabase.auth.getSession();
+    
     if (error) {
+      console.error("🔍 Supabase session error:", error);
       console.error("Error getting current session:", error.message);
       return null;
     }
+    
+    console.log("🔍 Supabase session:", session ? "exists" : "null");
+    if (session) {
+      console.log("🔍 Session access_token:", session.access_token ? "exists" : "missing");
+      console.log("🔍 Session user:", session.user ? session.user.id : "no user");
+    }
     return session;
   } catch (error) {
+    console.error("🔍 Error getting session:", error);
     console.error("Unexpected error getting current session:", error);
     return null;
   }

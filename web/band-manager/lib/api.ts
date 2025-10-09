@@ -7,19 +7,34 @@ class ApiClient {
 
   constructor(baseUrl: string = API_BASE_URL) {
     this.baseUrl = baseUrl;
+    console.log("🔍 ApiClient initialized with baseUrl:", this.baseUrl);
+    console.log("🔍 Environment variable NEXT_PUBLIC_API_URL:", process.env.NEXT_PUBLIC_API_URL);
+    console.log("🔍 Default API_BASE_URL:", API_BASE_URL);
   }
 
   private async getAuthHeaders(): Promise<Record<string, string>> {
-    const session = await getCurrentSession();
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-    };
+    console.log("🔍 Getting auth headers...");
+    try {
+      const session = await getCurrentSession();
+      console.log("🔍 Session:", session ? "exists" : "null");
+      console.log("🔍 Access token:", session?.access_token ? "exists" : "missing");
+      
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
 
-    if (session?.access_token) {
-      headers.Authorization = `Bearer ${session.access_token}`;
+      if (session?.access_token) {
+        headers.Authorization = `Bearer ${session.access_token}`;
+      }
+
+      console.log("🔍 Final headers:", headers);
+      return headers;
+    } catch (error) {
+      console.error("🔍 Error getting auth headers:", error);
+      return {
+        "Content-Type": "application/json",
+      };
     }
-
-    return headers;
   }
 
   private async request<T>(
@@ -27,8 +42,14 @@ class ApiClient {
     options: RequestInit = {},
   ): Promise<{ data: T | null; error: string | null }> {
     try {
+      console.log("🔍 Making request to:", `${this.baseUrl}${endpoint}`);
+      console.log("🔍 API_BASE_URL:", this.baseUrl);
+      console.log("🔍 Environment variable:", process.env.NEXT_PUBLIC_API_URL);
+      
       const headers = await this.getAuthHeaders();
+      console.log("🔍 Headers:", headers);
 
+      console.log("🔍 About to fetch...");
       const response = await fetch(`${this.baseUrl}${endpoint}`, {
         ...options,
         headers: {
@@ -36,8 +57,10 @@ class ApiClient {
           ...options.headers,
         },
       });
+      console.log("🔍 Fetch completed, response:", response);
 
       if (!response.ok) {
+        console.log("🔍 Response not ok:", response.status, response.statusText);
         const errorData = await response.json().catch(() => ({}));
         const errorMessage =
           errorData.detail || `HTTP ${response.status}: ${response.statusText}`;
@@ -45,9 +68,11 @@ class ApiClient {
       }
 
       const data = await response.json();
+      console.log("🔍 Response data:", data);
       return { data, error: null };
     } catch (error) {
-      console.error("API request failed:", error);
+      console.error("🔍 API request failed:", error);
+      console.error("🔍 Error stack:", error instanceof Error ? error.stack : 'No stack');
       return {
         data: null,
         error:
