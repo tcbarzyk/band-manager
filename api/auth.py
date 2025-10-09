@@ -1,6 +1,7 @@
 """
 Supabase authentication integration for the Band Manager API.
 Handles JWT token validation and user authentication.
+Uses FastAPI dependencies to secure endpoints.
 """
 
 import os
