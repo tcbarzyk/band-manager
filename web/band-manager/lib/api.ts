@@ -58,6 +58,9 @@ class ApiClient {
         },
       });
       console.log("🔍 Fetch completed, response:", response);
+      console.log("🔍 Response status:", response.status);
+      console.log("🔍 Response ok:", response.ok);
+      console.log("🔍 Response headers:", Object.fromEntries(response.headers.entries()));
 
       if (!response.ok) {
         console.log("🔍 Response not ok:", response.status, response.statusText);
@@ -67,8 +70,25 @@ class ApiClient {
         return { data: null, error: errorMessage };
       }
 
-      const data = await response.json();
-      console.log("🔍 Response data:", data);
+      console.log("🔍 About to parse JSON...");
+      let data;
+      try {
+        const responseText = await response.text();
+        console.log("🔍 Response text:", responseText);
+        
+        if (!responseText) {
+          console.log("🔍 Empty response body");
+          return { data: null, error: null };
+        }
+        
+        data = JSON.parse(responseText);
+        console.log("🔍 Parsed JSON data:", data);
+      } catch (parseError) {
+        console.error("🔍 JSON parse error:", parseError);
+        console.error("🔍 Failed to parse response as JSON");
+        return { data: null, error: "Invalid JSON response from server" };
+      }
+
       return { data, error: null };
     } catch (error) {
       console.error("🔍 API request failed:", error);
