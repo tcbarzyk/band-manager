@@ -29,7 +29,13 @@ app = FastAPI(
 # CORS middleware for frontend integration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure this properly in production
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:3001", 
+        "https://tcbarzyk.dev",
+        "https://bandmanager.tcbarzyk.dev",
+        "https://band-manager-ashen.vercel.app",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
