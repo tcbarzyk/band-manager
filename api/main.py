@@ -27,7 +27,6 @@ app = FastAPI(
 )
 
 # CORS middleware for frontend integration
-"""
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -37,13 +36,6 @@ app.add_middleware(
         "https://bandmanager.tcbarzyk.dev",
         "https://band-manager-ashen.vercel.app",
     ],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)"""
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Temporarily allow all
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
