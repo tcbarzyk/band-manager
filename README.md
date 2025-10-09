@@ -56,6 +56,7 @@ A comprehensive full-stack application for managing bands, events, venues, and m
 - **Backend Hosting**: DigitalOcean
 - **Database**: Supabase (Managed PostgreSQL)
 - **Authentication**: Supabase Auth
+- **CI/CD**: GitHub Actions
 - **SSL**: Let's Encrypt
 - **Reverse Proxy**: Nginx
 
@@ -63,6 +64,8 @@ A comprehensive full-stack application for managing bands, events, venues, and m
 
 ```
 band-manager/
+├── .github/
+│   └── workflows/         # GitHub Actions CI/CD pipelines
 ├── api/                    # FastAPI Backend
 │   ├── main.py            # FastAPI application entry point
 │   ├── models.py          # SQLAlchemy database models
@@ -86,6 +89,48 @@ band-manager/
 ├── infra/                 # Infrastructure configurations
 └── README.md              # This file
 ```
+
+## 📊 API Documentation
+
+The API provides comprehensive endpoints for managing bands, events, venues, and users. Full documentation is available at:
+
+- **Development**: `http://localhost:8000/docs`
+- **Production**: `https://bandmanager.api.tcbarzyk.dev/docs`
+
+### Key Endpoints
+
+#### Authentication
+- `GET /auth/me` - Get current user profile
+- `PUT /auth/me` - Update current user profile
+
+#### Bands
+- `POST /bands` - Create a new band
+- `GET /my/bands` - Get current user's bands
+- `GET /bands/{id}` - Get band details
+- `POST /bands/join/{code}` - Join band with code
+
+#### Events
+- `POST /bands/{id}/events` - Create event for band
+- `GET /bands/{id}/events` - Get band events
+- `PUT /events/{id}` - Update event
+- `DELETE /events/{id}` - Delete event
+
+#### Venues
+- `POST /bands/{id}/venues` - Create venue for band
+- `GET /bands/{id}/venues` - Get band venues
+- `PUT /venues/{id}` - Update venue
+- `DELETE /venues/{id}` - Delete venue
+
+## 🔒 Security Features
+
+- **JWT Authentication** with Supabase
+- **CORS Configuration** for cross-origin requests
+- **Input Validation** with Pydantic schemas
+- **SQL Injection Protection** with SQLAlchemy ORM
+- **Rate Limiting** and security headers
+- **HTTPS/SSL** in production
+- **Environment Variable** protection
+
 
 ## 🚀 Getting Started
 
@@ -187,6 +232,22 @@ cd api
 # The database tables will be created automatically via SQLAlchemy
 alembic upgrade head
 ```
+
+## 🔄 CI/CD Pipeline
+
+This project uses **GitHub Actions** for deployment automation.
+
+### Deployment Strategy
+
+- **Frontend (Vercel)**: Automatic deployment on push to `main` branch via Vercel GitHub integration
+- **Backend (DigitalOcean)**: Deployment using GitHub Actions for automated server updates
+
+### Workflow Overview
+
+The CI/CD pipeline handles:
+- Automated backend deployment to DigitalOcean droplet
+- Environment variable management
+- Service restarts and health checks
 
 ## 🌐 Production Deployment
 
@@ -326,53 +387,6 @@ vercel --prod
 cd api
 python -m pytest tests/ -v
 ```
-
-### Frontend Tests
-```bash
-cd web/band-manager
-npm test
-```
-
-## 📊 API Documentation
-
-The API provides comprehensive endpoints for managing bands, events, venues, and users. Full documentation is available at:
-
-- **Development**: `http://localhost:8000/docs`
-- **Production**: `https://bandmanager.api.tcbarzyk.dev/docs`
-
-### Key Endpoints
-
-#### Authentication
-- `GET /auth/me` - Get current user profile
-- `PUT /auth/me` - Update current user profile
-
-#### Bands
-- `POST /bands` - Create a new band
-- `GET /my/bands` - Get current user's bands
-- `GET /bands/{id}` - Get band details
-- `POST /bands/join/{code}` - Join band with code
-
-#### Events
-- `POST /bands/{id}/events` - Create event for band
-- `GET /bands/{id}/events` - Get band events
-- `PUT /events/{id}` - Update event
-- `DELETE /events/{id}` - Delete event
-
-#### Venues
-- `POST /bands/{id}/venues` - Create venue for band
-- `GET /bands/{id}/venues` - Get band venues
-- `PUT /venues/{id}` - Update venue
-- `DELETE /venues/{id}` - Delete venue
-
-## 🔒 Security Features
-
-- **JWT Authentication** with Supabase
-- **CORS Configuration** for cross-origin requests
-- **Input Validation** with Pydantic schemas
-- **SQL Injection Protection** with SQLAlchemy ORM
-- **Rate Limiting** and security headers
-- **HTTPS/SSL** in production
-- **Environment Variable** protection
 
 ## 🚧 Troubleshooting
 
